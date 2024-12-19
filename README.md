@@ -1,6 +1,10 @@
+Here's the updated version of your document with the recent progress and the SSL configuration:
+
+---
+
 # Web Server Landing Page
 
-This repository documents the steps for provisioning an EC2 instance, setting up a web server, deploying an HTML landing page, and configuring networking.
+This repository documents the steps for provisioning an EC2 instance, setting up a web server, deploying an HTML landing page, and configuring networking, including setting up SSL for secure access.
 
 ## Provisioning the Server
 - **Cloud Provider**: AWS EC2
@@ -9,7 +13,7 @@ This repository documents the steps for provisioning an EC2 instance, setting up
 - **Steps**:
   1. Created a new EC2 instance from the AWS Management Console.
   2. Chose the **Ubuntu Server 22.04 LTS** AMI.
-  3. Configured the instance with a **Security Group** that allows HTTP (port 80) traffic and SSH (port 22).
+  3. Configured the instance with a **Security Group** that allows HTTP (port 80), HTTPS (port 443), and SSH (port 22) traffic.
   4. Created a new SSH key pair (`<YourKeyName>.pem`) for accessing the instance.
 
 ## Web Server Setup
@@ -73,20 +77,40 @@ This repository documents the steps for provisioning an EC2 instance, setting up
 - The screenshot below shows the landing page running in the browser:
   ![Landing Page Screenshot](screenshot.png)  <!-- Replace with the actual screenshot file name -->
 
-## Bonus Task (Optional): Configure HTTPS with Let's Encrypt
+## SSL Configuration: Self-Signed SSL Certificate
+Since Let's Encrypt was not available, we configured a **self-signed SSL certificate** for HTTPS access:
 - **Steps**:
-  1. Install Certbot for Apache:
+  1. Generate a self-signed certificate:
      ```bash
-     sudo apt install certbot python3-certbot-apache -y
+     sudo openssl req -x509 -newkey rsa:4096 -keyout /etc/ssl/private/webkey.key -out /etc/ssl/certs/webkey.crt -days 365 -nodes
      ```
-  2. Run Certbot to automatically configure SSL for Apache:
+  2. Edit the Apache SSL configuration to point to the newly generated certificate:
      ```bash
-     sudo certbot --apache
+     sudo nano /etc/apache2/sites-available/default-ssl.conf
      ```
-  3. Follow the interactive prompts to choose your domain name and agree to the terms.
-  4. Once completed, your site will be available via HTTPS, and Certbot will automatically renew the certificate.
+  3. Modify the following lines:
+     ```bash
+     SSLCertificateFile      /etc/ssl/certs/webkey.crt
+     SSLCertificateKeyFile   /etc/ssl/private/webkey.key
+     ```
+  4. Enable the SSL module and the SSL site:
+     ```bash
+     sudo a2enmod ssl
+     sudo a2ensite default-ssl.conf
+     ```
+  5. Restart Apache to apply the changes:
+     ```bash
+     sudo systemctl restart apache2
+     ```
+
+Now, the landing page is accessible via HTTPS, though it may show a browser warning due to the self-signed certificate.
 
 ---
 
 ### **Additional Notes**
 - This repository includes the necessary steps to provision an EC2 instance, set up Apache, deploy a landing page, and ensure networking is properly configured for public access.
+- SSL was configured using a self-signed certificate due to issues with Let's Encrypt, but for production environments, a certificate from a trusted authority should be used.
+
+---
+
+Feel free to add the actual screenshot and any additional details as needed. Let me know if you need further adjustments!
