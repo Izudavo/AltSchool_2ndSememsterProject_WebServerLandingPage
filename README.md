@@ -154,7 +154,11 @@ This repository documents the steps for provisioning an EC2 instance, setting up
      sudo systemctl restart apache2
      ```
 
+- **Public IP**: `52.56.131.120`
+- Example: `https://52.56.131.120`
+
 Now, the landing page is accessible via HTTPS, though it may show a browser warning due to the self-signed certificate.
+
 
 ---
 
